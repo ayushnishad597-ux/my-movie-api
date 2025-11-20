@@ -1,51 +1,45 @@
 const express = require('express');
 const cors = require('cors');
-// Working Library Import
+// Standard Library Import
 const { MOVIES } = require('@consumet/api');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// FlixHQ Provider Setup
+// FlixHQ Provider
 const flixhq = new MOVIES.FlixHQ(); 
 
 app.use(cors());
 
-// Home Page Check
 app.get('/', (req, res) => {
-    res.send('PIKAFLIX PRIVATE SERVER IS READY! ✅');
+    res.send('SERVER IS ON! 🟢');
 });
 
-// Streaming API
 app.get('/stream', async (req, res) => {
     try {
         const name = req.query.name; 
-        if (!name) return res.status(400).json({ error: "Naam bhejo" });
+        if (!name) return res.status(400).json({ error: "Name required" });
 
-        console.log("Searching for:", name);
+        console.log("Searching:", name);
 
-        // 1. Movie Search
+        // 1. Search
         const search = await flixhq.search(name);
-        if (!search.results || search.results.length === 0) {
-            return res.status(404).json({ error: "Movie nahi mili" });
-        }
+        if (!search.results.length) return res.status(404).json({ error: "Not found" });
 
         const movie = search.results[0];
 
-        // 2. Info & Episode ID
+        // 2. Get Episode ID
         const info = await flixhq.fetchMediaInfo(movie.id);
-        
-        // Movie hai to pehla episode, nahi to error avoid karo
         if (!info.episodes || info.episodes.length === 0) {
-             return res.status(404).json({ error: "Episodes nahi mile" });
+             return res.status(404).json({ error: "No episodes found" });
         }
         
         const episodeId = info.episodes[0].id; 
 
-        // 3. Direct Link Extraction
+        // 3. Get Stream
         const streamData = await flixhq.fetchEpisodeSources(episodeId, movie.id);
         
-        // 4. Best Quality (Auto ya 1080p)
+        // 4. Best Quality
         const bestStream = streamData.sources.find(s => s.quality === 'auto') || streamData.sources[0];
 
         res.status(200).json({ 
@@ -59,7 +53,6 @@ app.get('/stream', async (req, res) => {
     }
 });
 
-// Server Start
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`Running on ${port}`);
 });
