@@ -1,39 +1,29 @@
 const express = require('express');
 const cors = require('cors');
-// Sahi Library Name wapas laga diya
 const { MOVIES } = require('@consumet/api');
 
 const app = express();
-const port = process.env.PORT || 3000; // Render ke liye zaroori hai
+const port = process.env.PORT || 3000;
 const flixhq = new MOVIES.FlixHQ(); 
 
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('PIKAFLIX SERVER IS LIVE! 🚀');
+    res.send('SERVER IS ON 🔥');
 });
 
 app.get('/stream', async (req, res) => {
     try {
         const name = req.query.name; 
-        if (!name) return res.status(400).json({ error: "Naam bhejo bhai" });
+        if (!name) return res.status(400).json({ error: "Name required" });
 
-        // 1. Search
         const search = await flixhq.search(name);
-        if (!search.results || search.results.length === 0) {
-            return res.status(404).json({ error: "Movie nahi mili" });
-        }
+        if (!search.results.length) return res.status(404).json({ error: "Not found" });
 
         const movie = search.results[0];
-
-        // 2. Info
         const info = await flixhq.fetchMediaInfo(movie.id);
         const episodeId = info.episodes[0].id; 
-
-        // 3. Stream Link
         const streamData = await flixhq.fetchEpisodeSources(episodeId, movie.id);
-        
-        // 4. Best Quality
         const bestStream = streamData.sources.find(s => s.quality === 'auto') || streamData.sources[0];
 
         res.status(200).json({ 
@@ -42,11 +32,8 @@ app.get('/stream', async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Error" });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+app.listen(port, () => console.log(`Running on ${port}`));
