@@ -1,5 +1,5 @@
 {
-  "name": "movie-api",
+  "name": "pika-server",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
