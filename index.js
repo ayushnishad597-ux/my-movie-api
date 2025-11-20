@@ -1,25 +1,22 @@
 const express = require('express');
 const cors = require('cors');
-// Consumet library use kar rahe hain jo links nikalti hai
-const { MOVIES } = require('@consumet/api');
+// Nayi Library (Jo delete nahi hui hai)
+const { MOVIES } = require('consumet.js');
 
 const app = express();
-const port = process.env.PORT || 3000; // Render ke liye ye zaroori hai
-const flixhq = new MOVIES.FlixHQ();
+const port = process.env.PORT || 3000; // Render ke liye zaroori hai
+const flixhq = new MOVIES.FlixHQ(); 
 
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('RENDER SERVER IS RUNNING! 🚀');
+    res.send('PIKAFLIX SERVER IS LIVE ON RENDER! 🚀');
 });
 
-// Stream API
 app.get('/stream', async (req, res) => {
     try {
         const name = req.query.name; 
-        if (!name) return res.status(400).json({ error: "Naam bhejo" });
-
-        console.log("Searching for:", name);
+        if (!name) return res.status(400).json({ error: "Naam bhejo bhai" });
 
         // 1. Search
         const search = await flixhq.search(name);
@@ -29,14 +26,14 @@ app.get('/stream', async (req, res) => {
 
         const movie = search.results[0];
 
-        // 2. Episode ID
+        // 2. Info
         const info = await flixhq.fetchMediaInfo(movie.id);
         const episodeId = info.episodes[0].id; 
 
-        // 3. Link Extraction
+        // 3. Stream Link
         const streamData = await flixhq.fetchEpisodeSources(episodeId, movie.id);
         
-        // 4. Best Quality
+        // 4. Best Quality Link
         const bestStream = streamData.sources.find(s => s.quality === 'auto') || streamData.sources[0];
 
         res.status(200).json({ 
@@ -50,7 +47,7 @@ app.get('/stream', async (req, res) => {
     }
 });
 
-// RENDER KE LIYE YE LINE SABSE IMPORTANT HAI:
+// Server Start Karo
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
