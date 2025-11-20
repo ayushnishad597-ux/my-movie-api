@@ -1,47 +1,52 @@
 const express = require('express');
 const cors = require('cors');
-// Nayi Library Import kar rahe hain
-const { MOVIES } = require('consumet.js');
+// Sahi library import kar rahe hain
+const { MOVIES } = require('@consumet/api');
 
 const app = express();
-// FlixHQ provider initialize kar rahe hain
+// FlixHQ provider (Best for Movies)
 const flixhq = new MOVIES.FlixHQ(); 
 
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('PIKAFLIX SERVER IS LIVE & FIXED! 🔥');
+    res.send('PIKAFLIX SERVER IS LIVE! 🟢');
 });
 
 app.get('/stream', async (req, res) => {
     try {
         const name = req.query.name; 
-        if (!name) return res.status(400).json({ error: "Naam bhejo bhai" });
+        if (!name) return res.status(400).json({ error: "Name required" });
 
-        // 1. Search
+        // 1. Movie Search
         const search = await flixhq.search(name);
-        if (search.results.length === 0) return res.status(404).json({ error: "Movie nahi mili" });
+        if (!search.results || search.results.length === 0) {
+            return res.status(404).json({ error: "Not found" });
+        }
 
         const movie = search.results[0];
 
-        // 2. Info
+        // 2. Info & Episode ID
         const info = await flixhq.fetchMediaInfo(movie.id);
+        // Movies usually have 1 episode, grab the first one
         const episodeId = info.episodes[0].id; 
 
-        // 3. Stream Link
+        // 3. Get Stream Link
         const streamData = await flixhq.fetchEpisodeSources(episodeId, movie.id);
         
-        // 4. Best Quality
+        // 4. Best Quality Link
+        // Auto ya 1080p dhundo, nahi to pehla wala de do
         const bestStream = streamData.sources.find(s => s.quality === 'auto') || streamData.sources[0];
 
         res.status(200).json({ 
             url: bestStream.url,
-            title: movie.title
+            title: movie.title,
+            isM3U8: bestStream.isM3U8
         });
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Server error, try again." });
+        res.status(500).json({ error: "Server processing error" });
     }
 });
 
