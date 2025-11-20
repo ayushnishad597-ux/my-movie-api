@@ -8,6 +8,6 @@
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "@consumet/api": "1.5.1"
+    "@consumet/api": "*"
   }
 }
