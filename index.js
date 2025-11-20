@@ -3,15 +3,14 @@ const cors = require('cors');
 const { MOVIES } = require('@consumet/api');
 
 const app = express();
-const flixhq = new MOVIES.FlixHQ(); // Ye provider movies dhundega
+const flixhq = new MOVIES.FlixHQ();
 
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('Mera Private Server Chal Gaya! 🚀');
+    res.send('PIKA SERVER IS LIVE! 🔥');
 });
 
-// 1. Movie Search Karne ke liye
 app.get('/search/:query', async (req, res) => {
     try {
         const results = await flixhq.search(req.params.query);
@@ -21,7 +20,6 @@ app.get('/search/:query', async (req, res) => {
     }
 });
 
-// 2. Movie ka Direct Link nikalne ke liye
 app.get('/watch/:episodeId/:mediaId', async (req, res) => {
     try {
         const data = await flixhq.fetchEpisodeSources(req.params.episodeId, req.params.mediaId);
@@ -31,4 +29,6 @@ app.get('/watch/:episodeId/:mediaId', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log("Server Ready"));
+// YAHAN CHANGE KIYA HAI:
+// app.listen hata diya hai
+module.exports = app;
