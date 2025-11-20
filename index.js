@@ -1,39 +1,39 @@
 const express = require('express');
 const cors = require('cors');
-const { MOVIES } = require('@consumet/api');
+// Nayi Library Import kar rahe hain
+const { MOVIES } = require('consumet.js');
 
 const app = express();
-const flixhq = new MOVIES.FlixHQ(); // Ye provider best hai movies ke liye
+// FlixHQ provider initialize kar rahe hain
+const flixhq = new MOVIES.FlixHQ(); 
 
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('PIKAFLIX SERVER IS ACTIVE! 🟢');
+    res.send('PIKAFLIX SERVER IS LIVE & FIXED! 🔥');
 });
 
-// MAGIC API: Ye naam lega aur Direct Video Link dega
 app.get('/stream', async (req, res) => {
     try {
         const name = req.query.name; 
         if (!name) return res.status(400).json({ error: "Naam bhejo bhai" });
 
-        // 1. Movie Search karo
+        // 1. Search
         const search = await flixhq.search(name);
         if (search.results.length === 0) return res.status(404).json({ error: "Movie nahi mili" });
 
-        const movie = search.results[0]; // Pehla result uthao
+        const movie = search.results[0];
 
-        // 2. Info nikalo (Episode ID chahiye hoti hai)
+        // 2. Info
         const info = await flixhq.fetchMediaInfo(movie.id);
         const episodeId = info.episodes[0].id; 
 
-        // 3. Direct Video Link nikalo
+        // 3. Stream Link
         const streamData = await flixhq.fetchEpisodeSources(episodeId, movie.id);
         
-        // 4. Best Quality Link filter karo
+        // 4. Best Quality
         const bestStream = streamData.sources.find(s => s.quality === 'auto') || streamData.sources[0];
 
-        // Link bhej do
         res.status(200).json({ 
             url: bestStream.url,
             title: movie.title
