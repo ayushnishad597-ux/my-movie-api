@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-// Nayi Library (Jo delete nahi hui hai)
-const { MOVIES } = require('consumet.js');
+// Sahi Library Name wapas laga diya
+const { MOVIES } = require('@consumet/api');
 
 const app = express();
 const port = process.env.PORT || 3000; // Render ke liye zaroori hai
@@ -10,7 +10,7 @@ const flixhq = new MOVIES.FlixHQ();
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('PIKAFLIX SERVER IS LIVE ON RENDER! 🚀');
+    res.send('PIKAFLIX SERVER IS LIVE! 🚀');
 });
 
 app.get('/stream', async (req, res) => {
@@ -33,7 +33,7 @@ app.get('/stream', async (req, res) => {
         // 3. Stream Link
         const streamData = await flixhq.fetchEpisodeSources(episodeId, movie.id);
         
-        // 4. Best Quality Link
+        // 4. Best Quality
         const bestStream = streamData.sources.find(s => s.quality === 'auto') || streamData.sources[0];
 
         res.status(200).json({ 
@@ -47,7 +47,6 @@ app.get('/stream', async (req, res) => {
     }
 });
 
-// Server Start Karo
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
